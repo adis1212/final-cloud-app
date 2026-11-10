@@ -2,63 +2,41 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    {% load static %}
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Exam results - {{ course.name }}</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 <body>
+    <main class="container py-4">
+        {% if passed %}
+            <div class="alert alert-success">
+                Congratulations, {{ user.username }}! You have passed the exam.
+            </div>
+        {% else %}
+            <div class="alert alert-danger">Failed</div>
+            <a class="btn btn-link text-danger mb-3"
+               href="{% url 'onlinecourse:course_details' course.id %}">Re-test</a>
+        {% endif %}
 
- <nav class="navbar navbar-light bg-light">
-    <div class="container-fluid">
-        <div class="navbar-header">
-              <a class="navbar-brand" href="{% url 'onlinecourse:index' %}">Home</a>
-        </div>
-        <ul class="nav navbar-nav navbar-right">
-            {% if user.is_authenticated %}
-            <li>
-                <a class="btn btn-link" href="#">{{ user.first_name }}({{ user.username }})</a>
-                <a class="btn btn-link" href="{% url 'onlinecourse:logout' %}">Logout</a>
-            </li>
-            {% else %}
-            <li>
-                <form class="form-inline" action="{% url 'onlinecourse:login' %}" method="post">
-                    {% csrf_token %}
-                    <div class="input-group">
-                        <input type="text" class="form-control" placeholder="Username" name="username" >
-                        <input type="password" class="form-control" placeholder="Username" name="psw" >
-                        <button class="btn btn-primary" type="submit">Login</button>
-                        <a class="btn btn-link" href="{% url 'onlinecourse:registration' %}">Sign Up</a>
-                    </div>
-                </form>
-            </li>
-            {% endif %}
-        </ul>
-    </div>
-</nav>
+        <p>Total score: {{ score }} / {{ total_score }} ({{ grade }}%)</p>
 
-<div class="container-fluid">
-    {% if passed %}
-    <div class="alert alert-success">
-        Congratulations, {{ user.username }}! You have passed the exam.
-    </div>
-    {% else %}
-    <div class="alert alert-danger">Failed</div>
-    <a class="btn btn-link text-danger" href="{% url 'onlinecourse:course_details' course.id %}">Re-test</a>
-    {% endif %}
-
-    <p>Total score: {{ score }} / {{ total_score }} ({{ grade }}%)</p>
-    <div class="mt-3">
-        <h1 class="h5">Exam results</h1>
         {% for question in questions %}
             <section class="card mb-3">
-                <h2 class="card-header h6">{{ question.question_text }}</h2>
+                <h2 class="card-header h5">{{ question.question_text }}</h2>
                 <ul class="list-group list-group-flush">
                     {% for choice in question.choice_set.all %}
                         {% if choice.id in selected_ids and choice.is_correct %}
-                            <li class="list-group-item list-group-item-success">{{ choice.choice_text }}</li>
+                            <li class="list-group-item list-group-item-success">
+                                {{ choice.choice_text }} (correct answer selected)
+                            </li>
                         {% elif choice.id in selected_ids %}
-                            <li class="list-group-item list-group-item-danger">{{ choice.choice_text }}</li>
+                            <li class="list-group-item list-group-item-danger">
+                                {{ choice.choice_text }} (wrong answer selected)
+                            </li>
                         {% elif choice.is_correct %}
-                            <li class="list-group-item list-group-item-warning">{{ choice.choice_text }}</li>
+                            <li class="list-group-item list-group-item-warning">
+                                {{ choice.choice_text }} (correct answer not selected)
+                            </li>
                         {% else %}
                             <li class="list-group-item">{{ choice.choice_text }}</li>
                         {% endif %}
@@ -66,7 +44,6 @@
                 </ul>
             </section>
         {% endfor %}
-    </div>
-</div>
+    </main>
 </body>
 </html>
